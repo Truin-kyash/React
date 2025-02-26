@@ -1,4 +1,5 @@
-name: Build and Deploy Node.js App to Azure Web App - privateendpoint
+
+name: Build and deploy Node.js app to Azure Web App - privateendpoint
 
 on:
   push:
@@ -10,27 +11,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read # Required for actions/checkout
+      contents: read #This is required for actions/checkout
 
     steps:
-      - name: 🛠 Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🔧 Set up Node.js
+      - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      - name: 📦 Install Dependencies, Build, and Test
+      - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
-          npm test --if-present
-
-      - name: 📦 Zip Artifact for Deployment
+          
+      - name: Zip artifact for deployment
         run: zip release.zip ./* -r
 
-      - name: ⬆️ Upload Artifact for Deployment
+      - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
@@ -44,19 +43,19 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     
     steps:
-      - name: ⬇️ Download Artifact from Build Job
+      - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
 
-      - name: 📦 Unzip Artifact
+      - name: Unzip artifact for deployment
         run: unzip release.zip
-
-      - name: 🚀 Deploy to Azure Web App
+      
+      - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'privateendpoint'  # Replace with your Azure App Name
+          app-name: 'privateendpoint'
           slot-name: 'Production'
-          package: release.zip
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}  # Ensure this is correctly set in GitHub Secrets
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FDD0DEE6572E4A1DBC0FDECFE1D83571 }}
